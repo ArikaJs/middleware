@@ -173,10 +173,14 @@ The `Pipeline` class is the central engine of the middleware system. It manages 
 ### API
 
 ```ts
-class Pipeline {
+class Pipeline<TRequest = any, TResponse = any> {
     constructor(container?: Container);
-    pipe(middleware: MiddlewareHandler | MiddlewareHandler[]): this;
-    handle(request: Request, destination: (request: Request) => Promise<Response>): Promise<Response>;
+    pipe(middleware: MiddlewareHandler<TRequest, TResponse> | MiddlewareHandler<TRequest, TResponse>[]): this;
+    handle(
+        request: TRequest, 
+        destination: (request: TRequest, response?: TResponse) => Promise<TResponse> | TResponse,
+        response?: TResponse
+    ): Promise<TResponse>;
 }
 ```
 
