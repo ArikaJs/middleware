@@ -9,11 +9,29 @@ export class Pipeline<TRequest = any, TResponse = any> {
      * The stack of middleware handlers.
      */
     private handlers: MiddlewareHandler<TRequest, TResponse>[] = [];
+    private middlewareGroups: Record<string, any[]> = {};
+    private aliases: Record<string, any> = {};
 
     /**
      * Create a new Pipeline instance.
      */
     constructor(private readonly container?: Container) { }
+
+    /**
+     * Set the middleware groups.
+     */
+    public setMiddlewareGroups(groups: Record<string, any[]>): this {
+        this.middlewareGroups = groups;
+        return this;
+    }
+
+    /**
+     * Set the middleware aliases.
+     */
+    public setAliases(aliases: Record<string, any>): this {
+        this.aliases = aliases;
+        return this;
+    }
 
     /**
      * Add middleware to the pipeline.
@@ -35,12 +53,14 @@ export class Pipeline<TRequest = any, TResponse = any> {
         destination: (request: TRequest, response?: TResponse) => Promise<TResponse> | TResponse,
         response?: TResponse
     ): Promise<TResponse> {
-        const invoke = async (index: number, req: TRequest): Promise<TResponse> => {
-            const handler = this.resolve(this.handlers[index]);
+        const flattened = this.flattenHandlers(this.handlers);
 
-            if (!handler) {
+        const invoke = async (index: number, req: TRequest): Promise<TResponse> => {
+            if (index >= flattened.length) {
                 return destination(req, response);
             }
+
+            const handler = this.resolve(flattened[index]);
 
             if (typeof handler === 'function') {
                 return handler(req, (nextReq: TRequest) => invoke(index + 1, nextReq), response);
@@ -50,7 +70,7 @@ export class Pipeline<TRequest = any, TResponse = any> {
                 return (handler as any).handle(req, (nextReq: TRequest) => invoke(index + 1, nextReq), response);
             }
 
-            throw new Error('Invalid middleware handler provided to pipeline.');
+            throw new Error(`Invalid middleware handler: ${typeof handler}`);
         };
 
         return invoke(0, request);
@@ -59,11 +79,41 @@ export class Pipeline<TRequest = any, TResponse = any> {
     /**
      * Resolve the middleware handler.
      */
-    private resolve(handler: MiddlewareHandler): any {
+    private resolve(handler: any): any {
         if (typeof handler === 'string' && this.container) {
             return this.container.make(handler);
         }
 
         return handler;
+    }
+
+    /**
+     * Flatten handlers by resolving groups and aliases.
+     */
+    private flattenHandlers(handlers: any[]): any[] {
+        let flattened: any[] = [];
+
+        for (const handler of handlers) {
+            if (typeof handler === 'string') {
+                if (this.middlewareGroups[handler]) {
+                    flattened.push(...this.flattenHandlers(this.middlewareGroups[handler]));
+                    continue;
+                }
+
+                if (this.aliases[handler]) {
+                    const resolved = this.aliases[handler];
+                    if (Array.isArray(resolved)) {
+                        flattened.push(...this.flattenHandlers(resolved));
+                    } else {
+                        flattened.push(...this.flattenHandlers([resolved]));
+                    }
+                    continue;
+                }
+            }
+
+            flattened.push(handler);
+        }
+
+        return flattened;
     }
 }
