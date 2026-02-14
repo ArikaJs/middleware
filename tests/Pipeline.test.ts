@@ -112,7 +112,7 @@ test('Middleware can be resolved from container', async () => {
         }
     }
 
-    container.singleton('auth', () => new AuthMiddleware());
+
 
     const pipeline = new Pipeline(container);
     pipeline.pipe('auth');
