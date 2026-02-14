@@ -1,23 +1,21 @@
-import { Request, Response } from '@arikajs/http';
-
 /**
  * Middleware contract for ArikaJS.
  */
-export interface Middleware {
+export interface Middleware<TRequest = any, TResponse = any> {
     /**
      * Handle an incoming request.
      */
     handle(
-        request: Request,
-        next: (request: Request) => Promise<Response> | Response
-    ): Promise<Response> | Response;
+        request: TRequest,
+        next: (request: TRequest) => Promise<TResponse> | TResponse
+    ): Promise<TResponse> | TResponse;
 }
 
 /**
  * Type for middleware that can be either a class, a function, or a string key.
  */
-export type MiddlewareHandler =
-    | Middleware
-    | ((request: Request, next: (request: Request) => Promise<Response> | Response) => Promise<Response> | Response)
+export type MiddlewareHandler<TRequest = any, TResponse = any> =
+    | Middleware<TRequest, TResponse>
+    | ((request: TRequest, next: (request: TRequest) => Promise<TResponse> | TResponse) => Promise<TResponse> | TResponse)
     | string
     | any;

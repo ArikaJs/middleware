@@ -1,15 +1,14 @@
-import { Request, Response } from '@arikajs/http';
-import { Container } from '@arikajs/foundation';
+import { Container } from './Contracts/Container';
 import { MiddlewareHandler, Middleware } from './Middleware';
 
 /**
  * Pipeline executes a stack of middleware in an onion-style model.
  */
-export class Pipeline {
+export class Pipeline<TRequest = any, TResponse = any> {
     /**
      * The stack of middleware handlers.
      */
-    private handlers: MiddlewareHandler[] = [];
+    private handlers: MiddlewareHandler<TRequest, TResponse>[] = [];
 
     /**
      * Create a new Pipeline instance.
@@ -19,7 +18,7 @@ export class Pipeline {
     /**
      * Add middleware to the pipeline.
      */
-    public pipe(middleware: MiddlewareHandler | MiddlewareHandler[]): this {
+    public pipe(middleware: MiddlewareHandler<TRequest, TResponse> | MiddlewareHandler<TRequest, TResponse>[]): this {
         if (Array.isArray(middleware)) {
             this.handlers.push(...middleware);
         } else {
@@ -32,10 +31,10 @@ export class Pipeline {
      * Run the pipeline through the given destination.
      */
     public async handle(
-        request: Request,
-        destination: (request: Request) => Promise<Response> | Response
-    ): Promise<Response> {
-        const invoke = async (index: number, req: Request): Promise<Response> => {
+        request: TRequest,
+        destination: (request: TRequest) => Promise<TResponse> | TResponse
+    ): Promise<TResponse> {
+        const invoke = async (index: number, req: TRequest): Promise<TResponse> => {
             const handler = this.resolve(this.handlers[index]);
 
             if (!handler) {
@@ -43,11 +42,11 @@ export class Pipeline {
             }
 
             if (typeof handler === 'function') {
-                return handler(req, (nextReq: Request) => invoke(index + 1, nextReq));
+                return handler(req, (nextReq: TRequest) => invoke(index + 1, nextReq));
             }
 
             if (typeof handler === 'object' && 'handle' in handler && typeof handler.handle === 'function') {
-                return (handler as Middleware).handle(req, (nextReq: Request) => invoke(index + 1, nextReq));
+                return (handler as Middleware<TRequest, TResponse>).handle(req, (nextReq: TRequest) => invoke(index + 1, nextReq));
             }
 
             throw new Error('Invalid middleware handler provided to pipeline.');

@@ -35,10 +35,7 @@
         "url": "https://github.com/arikajs/middleware/issues"
     },
     "homepage": "https://github.com/arikajs/middleware#readme",
-    "dependencies": {
-        "@arikajs/http": "file:../http",
-        "@arikajs/foundation": "file:../foundation"
-    },
+    "dependencies": {},
     "devDependencies": {
         "@types/node": "^20.11.24",
         "typescript": "^5.3.3"

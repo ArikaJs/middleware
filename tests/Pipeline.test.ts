@@ -1,6 +1,6 @@
 import { Pipeline } from '../src/Pipeline';
 import { Request, Response } from '@arikajs/http';
-import { Container } from '@arikajs/foundation';
+
 import assert from 'node:assert';
 import { test } from 'node:test';
 import { ServerResponse } from 'node:http';
@@ -97,7 +97,12 @@ test('Middleware can be a class', async () => {
 });
 
 test('Middleware can be resolved from container', async () => {
-    const container = new Container();
+    const container = {
+        make: (token: any) => {
+            if (token === 'auth') return new AuthMiddleware();
+            return null;
+        }
+    } as any;
     const calls: string[] = [];
 
     class AuthMiddleware {
