@@ -7,7 +7,8 @@ export interface Middleware<TRequest = any, TResponse = any> {
      */
     handle(
         request: TRequest,
-        next: (request: TRequest) => Promise<TResponse> | TResponse
+        next: (request: TRequest) => Promise<TResponse> | TResponse,
+        response?: TResponse
     ): Promise<TResponse> | TResponse;
 }
 
@@ -16,6 +17,6 @@ export interface Middleware<TRequest = any, TResponse = any> {
  */
 export type MiddlewareHandler<TRequest = any, TResponse = any> =
     | Middleware<TRequest, TResponse>
-    | ((request: TRequest, next: (request: TRequest) => Promise<TResponse> | TResponse) => Promise<TResponse> | TResponse)
+    | ((request: TRequest, next: (request: TRequest) => Promise<TResponse> | TResponse, response?: TResponse) => Promise<TResponse> | TResponse)
     | string
     | any;

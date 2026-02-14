@@ -32,21 +32,22 @@ export class Pipeline<TRequest = any, TResponse = any> {
      */
     public async handle(
         request: TRequest,
-        destination: (request: TRequest) => Promise<TResponse> | TResponse
+        destination: (request: TRequest, response?: TResponse) => Promise<TResponse> | TResponse,
+        response?: TResponse
     ): Promise<TResponse> {
         const invoke = async (index: number, req: TRequest): Promise<TResponse> => {
             const handler = this.resolve(this.handlers[index]);
 
             if (!handler) {
-                return destination(req);
+                return destination(req, response);
             }
 
             if (typeof handler === 'function') {
-                return handler(req, (nextReq: TRequest) => invoke(index + 1, nextReq));
+                return handler(req, (nextReq: TRequest) => invoke(index + 1, nextReq), response);
             }
 
             if (typeof handler === 'object' && 'handle' in handler && typeof handler.handle === 'function') {
-                return (handler as Middleware<TRequest, TResponse>).handle(req, (nextReq: TRequest) => invoke(index + 1, nextReq));
+                return (handler as any).handle(req, (nextReq: TRequest) => invoke(index + 1, nextReq), response);
             }
 
             throw new Error('Invalid middleware handler provided to pipeline.');
