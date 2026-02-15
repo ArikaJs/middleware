@@ -36,7 +36,7 @@
     },
     "homepage": "https://github.com/arikajs/middleware#readme",
     "dependencies": {
-        "@arikajs/http": "^0.1.0"
+        "@arikajs/http": "file:../http"
     },
     "devDependencies": {
         "@types/node": "^20.11.24",
