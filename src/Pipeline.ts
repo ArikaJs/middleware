@@ -1,5 +1,6 @@
 import { Container } from './Contracts/Container';
 import { MiddlewareHandler, Middleware } from './Middleware';
+import { Log } from '@arikajs/logging';
 
 /**
  * Pipeline executes a stack of middleware in an onion-style model.
@@ -80,8 +81,25 @@ export class Pipeline<TRequest = any, TResponse = any> {
      * Resolve the middleware handler.
      */
     private resolve(handler: any): any {
-        if (typeof handler === 'string' && this.container) {
-            return this.container.make(handler);
+        // If it's a string, try resolving from container first
+        if (typeof handler === 'string') {
+            if (this.container && this.container.has(handler)) {
+                return this.container.make(handler);
+            }
+            return handler;
+        }
+
+        // If it's a class/constructor (has handle on prototype), instantiate it
+        if (typeof handler === 'function') {
+            const isClass = /^\s*class\s+/.test(handler.toString()) ||
+                (handler.prototype && typeof handler.prototype.handle === 'function');
+
+            if (isClass) {
+                if (this.container) {
+                    return this.container.make(handler);
+                }
+                return new (handler as any)();
+            }
         }
 
         return handler;
