@@ -61,14 +61,15 @@ export class Pipeline<TRequest = any, TResponse = any> {
                 return destination(req, response);
             }
 
-            const handler = this.resolve(flattened[index]);
+            const { handler: rawHandler, args } = this.parseHandler(flattened[index]);
+            const handler = this.resolve(rawHandler);
 
             if (typeof handler === 'function') {
-                return handler(req, (nextReq: TRequest) => invoke(index + 1, nextReq), response);
+                return handler(req, (nextReq: TRequest) => invoke(index + 1, nextReq), ...args);
             }
 
             if (typeof handler === 'object' && 'handle' in handler && typeof handler.handle === 'function') {
-                return (handler as any).handle(req, (nextReq: TRequest) => invoke(index + 1, nextReq), response);
+                return (handler as any).handle(req, (nextReq: TRequest) => invoke(index + 1, nextReq), ...args);
             }
 
             throw new Error(`Invalid middleware handler: ${typeof handler}`);
@@ -81,8 +82,11 @@ export class Pipeline<TRequest = any, TResponse = any> {
      * Resolve the middleware handler.
      */
     private resolve(handler: any): any {
-        // If it's a string, try resolving from container first
+        // If it's a string, try resolving from aliases first, then container
         if (typeof handler === 'string') {
+            if (this.aliases[handler]) {
+                return this.resolve(this.aliases[handler]);
+            }
             if (this.container && this.container.has(handler)) {
                 return this.container.make(handler);
             }
@@ -113,14 +117,18 @@ export class Pipeline<TRequest = any, TResponse = any> {
 
         for (const handler of handlers) {
             if (typeof handler === 'string') {
-                if (this.middlewareGroups[handler]) {
-                    flattened.push(...this.flattenHandlers(this.middlewareGroups[handler]));
+                const [name, args] = handler.split(':');
+                if (this.middlewareGroups[name]) {
+                    flattened.push(...this.flattenHandlers(this.middlewareGroups[name]));
                     continue;
                 }
 
-                if (this.aliases[handler]) {
-                    const resolved = this.aliases[handler];
-                    if (Array.isArray(resolved)) {
+                if (this.aliases[name]) {
+                    const resolved = this.aliases[name];
+                    // If it's an alias but we have args, we keep it as a string to parse later in handle()
+                    if (args) {
+                        flattened.push(handler);
+                    } else if (Array.isArray(resolved)) {
                         flattened.push(...this.flattenHandlers(resolved));
                     } else {
                         flattened.push(...this.flattenHandlers([resolved]));
@@ -133,5 +141,19 @@ export class Pipeline<TRequest = any, TResponse = any> {
         }
 
         return flattened;
+    }
+    /**
+     * Parse handler string to extract arguments.
+     */
+    private parseHandler(handler: any): { handler: any, args: any[] } {
+        if (typeof handler !== 'string') {
+            return { handler, args: [] };
+        }
+
+        const [name, ...args] = handler.split(':');
+        return {
+            handler: name,
+            args: args.length > 0 ? args[0].split(',') : []
+        };
     }
 }

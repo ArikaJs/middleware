@@ -36,8 +36,8 @@
     },
     "homepage": "https://github.com/arikajs/middleware#readme",
     "dependencies": {
-        "@arikajs/http": "^0.0.4",
-        "@arikajs/logging": "^0.0.4"
+        "@arikajs/http": "file:../http",
+        "@arikajs/logging": "file:../logging"
     },
     "devDependencies": {
         "@types/node": "^20.11.24",

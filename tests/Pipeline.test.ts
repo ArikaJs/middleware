@@ -98,6 +98,7 @@ test('Middleware can be a class', async () => {
 
 test('Middleware can be resolved from container', async () => {
     const container = {
+        has: (token: any) => token === 'auth',
         make: (token: any) => {
             if (token === 'auth') return new AuthMiddleware();
             return null;

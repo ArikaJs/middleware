@@ -164,6 +164,45 @@ Route.get('/dashboard', handler)
 kernel.use(logger);
 ```
 
+### 5. Middleware with Arguments
+
+You can pass arguments to middleware using a colon `:` separator.
+
+```ts
+// In your middleware definition:
+export const checkRole = async (req, next, role) => {
+    if (req.user.role !== role) {
+        return new Response('Unauthorized', 403);
+    }
+    return next(req);
+};
+
+// When usage:
+pipeline.pipe('auth:admin');
+```
+
+---
+
+## 🏛 Named Middleware & Groups
+
+You can register aliases and groups to keep your middleware definitions clean.
+
+```ts
+pipeline.setAliases({
+    'auth': AuthMiddleware,
+    'guest': GuestMiddleware
+});
+
+pipeline.setMiddlewareGroups({
+    'web': ['cookie', 'session', 'verifyCsrf'],
+    'api': ['throttle', 'auth:api']
+});
+
+// Usage
+pipeline.pipe('web');
+pipeline.pipe('auth:admin');
+```
+
 ---
 
 ## Middleware Pipeline
