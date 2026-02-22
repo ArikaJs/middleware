@@ -242,52 +242,6 @@ pipeline.pipe(authStack);
 
 ---
 
-## Project Structure
-
-- `src/`
-  - `Middleware.ts` – Middleware contract and types
-  - `Pipeline.ts` – Core execution logic
-  - `Compose.ts` – Middleware composition utility
-  - `index.ts` – Public exports
-- `tests/`
-  - `Pipeline.test.ts` – Integration tests for pipeline execution and order
-- `package.json`
-- `tsconfig.json`
-- `tsconfig.test.json`
-- `README.md`
-- `LICENSE`
-
----
-
-## 🧪 Versioning & Stability
-
-- Currently in **v0.x** (experimental).
-- Public API may evolve.
-- Will stabilize in **v1.0** once execution semantics are finalized.
-
----
-
-## 📜 License
-
-`@arikajs/middleware` is open-sourced software licensed under the **MIT license**.
-
----
-
-## 🧠 Philosophy
-
-> “Middleware is not logic — it is flow control.”
-
----
-
-## 🚀 Next Packages (Recommended Order)
-
-✅ Dispatcher
-✅ Middleware
-🔜 View Engine
-🔜 Validation
-🔜 Authentication
-🔜 CLI
-
 ## 🏗 Architecture
 
 ```text
@@ -310,3 +264,24 @@ middleware/
 └── README.md
 ```
 
+---
+
+## 🧪 Versioning & Stability
+
+- Currently in **v0.x** (experimental).
+- Public API may evolve.
+- Will stabilize in **v1.0** once execution semantics are finalized.
+
+---
+
+## 📜 License
+
+`@arikajs/middleware` is open-sourced software licensed under the **MIT license**.
+
+---
+
+## 🧠 Philosophy
+
+> “Middleware is not logic — it is flow control.”
+
+---
