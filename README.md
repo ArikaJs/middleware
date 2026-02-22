@@ -287,3 +287,26 @@ pipeline.pipe(authStack);
 🔜 Validation
 🔜 Authentication
 🔜 CLI
+
+## 🏗 Architecture
+
+```text
+middleware/
+├── src/
+│   ├── Contracts
+│   │   ├── Container.d.ts.map
+│   │   └── Container.ts
+│   ├── Compose.d.ts.map
+│   ├── Compose.ts
+│   ├── index.d.ts.map
+│   ├── index.ts
+│   ├── Middleware.d.ts.map
+│   ├── Middleware.ts
+│   ├── Pipeline.d.ts.map
+│   └── Pipeline.ts
+├── tests/
+├── package.json
+├── tsconfig.json
+└── README.md
+```
+
