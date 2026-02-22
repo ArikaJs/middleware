@@ -65,11 +65,11 @@ export class Pipeline<TRequest = any, TResponse = any> {
             const handler = this.resolve(rawHandler);
 
             if (typeof handler === 'function') {
-                return handler(req, (nextReq: TRequest) => invoke(index + 1, nextReq), ...args);
+                return handler(req, (nextReq: TRequest) => invoke(index + 1, nextReq), response, ...args);
             }
 
             if (typeof handler === 'object' && 'handle' in handler && typeof handler.handle === 'function') {
-                return (handler as any).handle(req, (nextReq: TRequest) => invoke(index + 1, nextReq), ...args);
+                return (handler as any).handle(req, (nextReq: TRequest) => invoke(index + 1, nextReq), response, ...args);
             }
 
             throw new Error(`Invalid middleware handler: ${typeof handler}`);

@@ -15,7 +15,7 @@ test('Enterprise Middleware with arguments', async () => {
 
     // Functional middleware with arguments
     // Signature is (req, next, ...args)
-    pipeline.pipe(async (req: any, next: any, role: string) => {
+    pipeline.pipe(async (req: any, next: any, res: any, role: string) => {
         calls.push(`role:${role}`);
         return next(req);
     });
@@ -29,7 +29,7 @@ test('Enterprise Middleware with arguments', async () => {
     // We need to pass the handler as a string to trigger parsing in this simple test,
     // but usually it's used with aliases. Let's register an alias.
     pipeline.setAliases({
-        'checkRole': async (req: any, next: any, role: string) => {
+        'checkRole': async (req: any, next: any, res: any, role: string) => {
             calls.push(`role:${role}`);
             return next(req);
         }
@@ -49,7 +49,7 @@ test('Middleware with multiple arguments', async () => {
     const calls: string[] = [];
 
     pipeline.setAliases({
-        'gate': async (req: any, next: any, p1: string, p2: string) => {
+        'gate': async (req: any, next: any, res: any, p1: string, p2: string) => {
             calls.push(`params:${p1},${p2}`);
             return next(req);
         }
